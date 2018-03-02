@@ -388,3 +388,12 @@ class Network:
                     scale=2/np.sqrt(layer.n_input)
                 layer.initialize_weight(loc=loc, scale=scale)
 
+    def set_save_mode(self):
+        for layer in self.layers:
+            if hasattr(layer, 'x'):
+                layer.x = None
+            if hasattr(layer, 'dW'):
+                layer.dW = None
+            if hasattr(layer, 'db'):
+                db = None
+                
