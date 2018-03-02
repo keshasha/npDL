@@ -44,7 +44,7 @@ class Affine:
             self.W = np.random.rand(self.n_input, self.n_output)/np.sqrt(self.n_input/1)
         else:
             self.W = np.random.normal(loc=loc, scale=scale, size=[self.n_input, self.n_output])
-        self.b = np.zeros(shape=[1, self.n_output])
+        self.b = np.ones(shape=[1, self.n_output])
     
 class Relu:
     def __init__(self):
@@ -188,7 +188,7 @@ class Convolution:
             self.W = np.random.rand(self.filter_n,self.input_shape[0],self.filter_shape[0],self.filter_shape[1])/np.sqrt(self.input_shape[0]*np.prod(self.filter_shape)/1)
         else:
             self.W = np.random.normal(loc=loc, scale=scale, size=[self.filter_n,self.input_shape[0],self.filter_shape[0],self.filter_shape[1]])
-        self.b = np.zeros([1,self.filter_n])
+        self.b = np.ones([1,self.filter_n])
     
     def forward(self, x):
         filter_h=self.filter_shape[0]
@@ -359,13 +359,6 @@ class Network:
                         layer.beta += learning_rate*layer.dbeta
                     
         return loss
-        
-#     def accuracy(self, x, t):
-#         y = self.predict(x)
-#         y = np.argmax(y, axis=1)
-#         if t.ndim != 1 : t = np.argmax(t, axis=1)
-#         accuracy = np.sum(y==t)/float(x.shape[0])
-#         return accuracy
     
     def accuracy(self, x, t, top=1):
         y = self.predict(x)
@@ -396,4 +389,9 @@ class Network:
                 layer.dW = None
             if hasattr(layer, 'db'):
                 db = None
-                
+            if hasattr(layer, 'adam_v_W'):
+                adam_v_W = 0
+            if hasattr(layer, 'adam_v_b'):
+                adam_v_b = 0
+            if hasattr(layer, 'iter'):
+                iter = 0
