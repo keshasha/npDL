@@ -1,6 +1,8 @@
 from myfunctions import *
 import numpy as np
 
+RANDOM_LEARNING = False
+
 class Affine:
     trainable = True
     def __init__(self, shape, initializer="He"):
@@ -9,7 +11,6 @@ class Affine:
         self.n_output = shape[1]
         
         self.initialize_weight(loc=0, scale=0.01, initializer=initializer)
-        
         # Momentum
         self.v_W = 0
         self.v_b = 0
@@ -44,7 +45,7 @@ class Affine:
             self.W = np.random.rand(self.n_input, self.n_output)/np.sqrt(self.n_input/1)
         else:
             self.W = np.random.normal(loc=loc, scale=scale, size=[self.n_input, self.n_output])
-        self.b = np.ones(shape=[1, self.n_output])
+        self.b = np.zeros(shape=[1, self.n_output])
     
 class Relu:
     def __init__(self):
@@ -160,6 +161,7 @@ class Convolution:
         self.W = None
         self.b = None
         self.initialize_weight(initializer=initializer)
+
         self.x = None
         self.dW = None
         self.db= None
@@ -188,7 +190,7 @@ class Convolution:
             self.W = np.random.rand(self.filter_n,self.input_shape[0],self.filter_shape[0],self.filter_shape[1])/np.sqrt(self.input_shape[0]*np.prod(self.filter_shape)/1)
         else:
             self.W = np.random.normal(loc=loc, scale=scale, size=[self.filter_n,self.input_shape[0],self.filter_shape[0],self.filter_shape[1]])
-        self.b = np.ones([1,self.filter_n])
+        self.b = np.zeros([1,self.filter_n])
     
     def forward(self, x):
         filter_h=self.filter_shape[0]
@@ -342,6 +344,18 @@ class Network:
                             
                             layer.v_b = 0.9*layer.v_b - 0.0005*learning_rate*layer.b - learning_rate*layer.db
                             layer.b += layer.v_b
+                            
+                        elif optimizer=='none':
+                            if RANDOM_LEARNING is True:
+                                dW_r = np.abs(np.random.normal(loc= 1.0, scale = 0.1,
+                                                             size = layer.dW.shape))
+                                db_r = np.abs(np.random.normal(loc= 1.0, scale = 1,
+                                                             size = layer.db.shape))
+                                layer.W -= learning_rate*np.multiply(layer.dW, dW_r)
+                                layer.b -= learning_rate*np.multiply(layer.db, db_r)
+                            else:
+                                layer.W -= learning_rate*layer.dW, dW_r
+                                layer.b -= learning_rate*layer.db, db_r
                             
                         else :
                             layer.v_W = momentum_rate*layer.v_W - learning_rate*layer.dW
